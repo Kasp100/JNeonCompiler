@@ -19,8 +19,8 @@ public class Token implements Matchable<TokenType> {
 		this(type, Optional.empty());
 	}
 
-	public Token(String content) {
-		this(TokenType.REFERENCE, Optional.of(content));
+	public Token(TokenType type, String content) {
+		this(type, Optional.of(content));
 	}
 
 	public TokenType getType() {
