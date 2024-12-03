@@ -23,7 +23,8 @@ public enum TokenType {
 	
 	public static Optional<TokenType> match(String s) {
 		for(TokenType tt : values()) {
-			if(tt.getSyntax().equals(s)) {
+			final Optional<String> ttSyntax = tt.getSyntax();
+			if(ttSyntax.isPresent() && ttSyntax.get().equals(s)) {
 				return Optional.of(tt);
 			}
 		}
