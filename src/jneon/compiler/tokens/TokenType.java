@@ -1,4 +1,4 @@
-package jneoncode.compiler.tokens;
+package jneon.compiler.tokens;
 
 import java.util.Optional;
 

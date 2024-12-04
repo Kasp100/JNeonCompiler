@@ -1,4 +1,4 @@
-package jneoncode.exceptions;
+package jneon.exceptions;
 
 public class TokenisationException extends CompileTimeException {
 

@@ -1,8 +1,8 @@
-package jneoncode.subnodes.types;
+package jneon.subnodes.types;
 
 import java.io.Serializable;
 
-import jneoncode.subnodes.TypeNode;
+import jneon.subnodes.TypeNode;
 
 public class ClassNode implements TypeNode, Serializable {
 

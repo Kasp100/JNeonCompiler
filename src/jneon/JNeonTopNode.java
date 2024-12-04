@@ -1,11 +1,11 @@
-package jneoncode;
+package jneon;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import jneoncode.exceptions.CompileTimeException;
-import jneoncode.subnodes.PkgNode;
+import jneon.exceptions.CompileTimeException;
+import jneon.subnodes.PkgNode;
 
 public class JNeonTopNode implements Serializable {
 

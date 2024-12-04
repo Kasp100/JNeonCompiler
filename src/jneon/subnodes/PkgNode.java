@@ -1,4 +1,4 @@
-package jneoncode.subnodes;
+package jneon.subnodes;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import jneoncode.exceptions.CompileTimeException;
+import jneon.exceptions.CompileTimeException;
 
 public class PkgNode implements Serializable {
 

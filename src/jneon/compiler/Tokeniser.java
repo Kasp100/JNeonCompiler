@@ -1,11 +1,11 @@
-package jneoncode.compiler;
+package jneon.compiler;
 
 import java.io.InputStreamReader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import jneoncode.compiler.tokens.Token;
-import jneoncode.exceptions.TokenisationException;
+import jneon.compiler.tokens.Token;
+import jneon.exceptions.TokenisationException;
 import reading.ReadException;
 import reading.impl.CharReader;
 

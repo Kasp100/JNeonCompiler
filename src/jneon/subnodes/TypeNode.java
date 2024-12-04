@@ -1,4 +1,4 @@
-package jneoncode.subnodes;
+package jneon.subnodes;
 
 import java.io.Serializable;
 
