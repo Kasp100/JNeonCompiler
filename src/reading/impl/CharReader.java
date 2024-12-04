@@ -77,4 +77,18 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 		}
 	}
 
+	public boolean consumeIfMatches(char matching) throws ReadException {
+		return consumeIfMatches(new MatchableChar(matching));
+	}
+
+	public boolean consumeAllIfNext(String matchNext) throws ReadException {
+		peek(matchNext.length() - 1); // Peek last char first for optimisation
+		for(int i = 0; i < matchNext.length(); i++) {
+			if(!peek(i).matches(matchNext.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }

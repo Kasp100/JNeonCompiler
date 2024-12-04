@@ -25,9 +25,17 @@ public class MatchableChar implements Matchable<MatchableChar> {
 		return c;
 	}
 
+	public boolean isEndOfFile() {
+		return endOfFile;
+	}
+
 	@Override
 	public boolean matches(MatchableChar pattern) {
 		return equals(pattern);
+	}
+
+	public boolean matches(char pattern) {
+		return matches(new MatchableChar(pattern));
 	}
 
 	@Override
