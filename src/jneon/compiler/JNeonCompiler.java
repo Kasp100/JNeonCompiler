@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
 import jneon.JNeonTopNode;
+import reading.ReadException;
 
 public class JNeonCompiler {
 
@@ -22,8 +23,8 @@ public class JNeonCompiler {
 		return topNode;
 	}
 
-	public void compile(File[] sourceFiles) throws FileNotFoundException, IOException {
-		for(File file :sourceFiles) {
+	public void compile(File... sourceFiles) throws FileNotFoundException, IOException {
+		for(File file : sourceFiles) {
 			tokeniseAndBuildAST(file);
 		}
 		resolveReferences();
@@ -41,7 +42,11 @@ public class JNeonCompiler {
 
 	private void buildAST(TokenReader tr) {
 		while(!tr.endOfFileReached()) {
-			
+			try {
+				System.out.println(tr.consume());
+			} catch (ReadException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
