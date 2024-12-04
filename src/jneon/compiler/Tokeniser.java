@@ -30,10 +30,12 @@ public class Tokeniser {
 		while(!reader.endOfFileReached()) {
 			try {
 				if(Character.isWhitespace(reader.peek().getChar())) {
+					reader.consume();
 					continue;
 				}
 				tokenQueue.add(tokeniseCurrent());
-			} catch (TokenisationException | ReadException e) {
+			} catch (Exception e) {
+				System.err.println("Tokenisation failed!");
 				e.printStackTrace();
 				break;
 			}
@@ -61,6 +63,14 @@ public class Tokeniser {
 			}
 		}
 
+		if(reader.consumeIfMatches(';')) {
+			return new Token(TokenType.END_STATEMENT);
+		}
+
+		if(reader.consumeIfMatches(',')) {
+			return new Token(TokenType.COMMA);
+		}
+
 		if(reader.consumeAllIfNext("mut:")) {
 			return new Token(TokenType.MUTABLE_REF);
 		}
@@ -77,7 +87,7 @@ public class Tokeniser {
 			return new Token(TokenType.STATIC_ACCESSOR);
 		}
 
-		throw new TokenisationException("Failed to create token");
+		throw new TokenisationException("Failed to create token (last char read: " + reader.peek().getChar() + ")");
 	}
 
 	private Optional<Token> parseString() throws ReadException, CompileTimeException {
@@ -175,7 +185,7 @@ public class Tokeniser {
 			throw new CompileTimeException("Unexpected end of file (reading word)");
 		}else if((start && Character.isJavaIdentifierStart(c.getChar())) ||
 				(!start && Character.isJavaIdentifierPart(c.getChar()))) {
-			word.append(c);
+			word.append(c.getChar());
 			reader.consume();
 			return true;
 		}else {

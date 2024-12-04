@@ -11,13 +11,15 @@ import reading.ReadException;
 public class QueueReader<ItemType extends Matchable<PatternType>, PatternType> implements PeekNConsumeReader<ItemType, PatternType> {
 
 	private final BlockingQueue<ItemType> itemQueue;
+	private final ItemType endOfFileItem;
 
 	private final List<ItemType> unconsumedPolledItems = new LinkedList<>();
 
 	private boolean endOfFile = false;
 
-	public QueueReader(BlockingQueue<ItemType> itemQueue) {
+	public QueueReader(BlockingQueue<ItemType> itemQueue, ItemType endOfFileItem) {
 		this.itemQueue = itemQueue;
+		this.endOfFileItem = endOfFileItem;
 	}
 
 	public void triggerEndOfFile() {
@@ -69,7 +71,21 @@ public class QueueReader<ItemType extends Matchable<PatternType>, PatternType> i
 	}
 
 	private void poll() {
-		unconsumedPolledItems.add(itemQueue.poll());
+		ItemType polled = itemQueue.poll();
+		while(polled == null) {
+			if(endOfFileReached()) {
+				unconsumedPolledItems.add(endOfFileItem);
+				return;
+			}else {
+				polled = itemQueue.poll();
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		unconsumedPolledItems.add(polled);
 	}
 
 }
