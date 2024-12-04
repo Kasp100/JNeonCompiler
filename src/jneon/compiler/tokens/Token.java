@@ -53,4 +53,13 @@ public class Token implements Matchable<TokenType> {
 		return type == pattern;
 	}
 
+	@Override
+	public String toString() {
+		if(content.isPresent()) {
+			return "[" + type + " \"" + content.get() + "\"]";
+		}else {
+			return "[" + type + "]";
+		}
+	}
+
 }
