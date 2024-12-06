@@ -33,7 +33,9 @@ public class Tokeniser {
 					reader.consume();
 					continue;
 				}
-				tokenQueue.add(tokeniseCurrent());
+				if(!skipComment()) {
+					tokenQueue.add(tokeniseCurrent());
+				}
 			} catch (Exception e) {
 				System.err.println("Tokenisation failed!");
 				e.printStackTrace();
@@ -49,9 +51,6 @@ public class Tokeniser {
 	}
 
 	private Token tokeniseCurrent() throws ReadException, TokenisationException {
-
-		skipComment();
-
 		{
 			final Optional<Token> parsedBracket = parseBracket();
 			if(parsedBracket.isPresent()) {
@@ -213,19 +212,21 @@ public class Tokeniser {
 		}
 	}
 	
-	private void skipComment() throws ReadException {
+	private boolean skipComment() throws ReadException {
 		if(reader.consumeAllIfNext("/*")) {
 			while(!reader.consumeAllIfNext("*/"))// Read until comment ends
 			{
 				reader.consume();
 			}
-		}
-		if(reader.consumeAllIfNext("//")) {
+			return true;
+		}else if(reader.consumeAllIfNext("//")) {
 			while(!reader.consumeIfMatches('\n'))// Read until next line
 			{
 				reader.consume();
 			}
+			return true;
 		}
+		return false;
 	}
 
 }
