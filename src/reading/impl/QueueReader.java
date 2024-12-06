@@ -57,7 +57,7 @@ public class QueueReader<ItemType extends Matchable<PatternType>, PatternType> i
 
 	@Override
 	public boolean endOfFileReached() {
-		return endOfFile;
+		return itemQueue.isEmpty() && endOfFile;
 	}
 
 	@Override

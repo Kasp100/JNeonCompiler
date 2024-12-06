@@ -10,7 +10,7 @@ public interface PeekNConsumeReader<ItemType extends Matchable<PatternType>, Pat
 
 	ItemType peek() throws ReadException;
 
-	boolean endOfFileReached();
+	boolean endOfFileReached() throws ReadException;
 
 	boolean consumeIfMatches(PatternType matching) throws ReadException;
 

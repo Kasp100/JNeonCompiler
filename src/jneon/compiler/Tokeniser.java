@@ -26,20 +26,17 @@ public class Tokeniser {
 	}
 
 	private void tokenise() {
-		while(!reader.endOfFileReached()) {
-			try {
+		try {
+			while(!reader.endOfFileReached()) {
 				if(Character.isWhitespace(reader.peek().getChar())) {
 					reader.consume();
-					continue;
-				}
-				if(!skipComment()) {
+				}else if(!skipComment()) {
 					tokenQueue.add(tokeniseCurrent());
 				}
-			} catch (Exception e) {
-				System.err.println("Tokenisation failed!");
-				e.printStackTrace();
-				break;
 			}
+		} catch (Exception e) {
+			System.err.println("Tokenisation failed!");
+			e.printStackTrace();
 		}
 
 		tokenReader.triggerEndOfFile();

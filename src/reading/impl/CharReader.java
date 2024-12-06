@@ -12,9 +12,7 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 
 	private final InputStreamReader reader;
 
-	private List<MatchableChar> unconsumedReadChars = new LinkedList<>();
-
-	private boolean doneReading = false;
+	private final List<MatchableChar> unconsumedReadChars = new LinkedList<>();
 
 	public CharReader(InputStreamReader reader) {
 		this.reader = reader;
@@ -44,7 +42,6 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 
 				if(charRead == -1) {
 					unconsumedReadChars.add(MatchableChar.END_OF_FILE);
-					
 				}else {
 					unconsumedReadChars.add(new MatchableChar((char) charRead));
 				}
@@ -61,8 +58,8 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 	}
 	
 	@Override
-	public boolean endOfFileReached() {
-		return unconsumedReadChars.isEmpty() && doneReading;
+	public boolean endOfFileReached() throws ReadException {
+		return peek().isEndOfFile();
 	}
 
 	@Override
@@ -88,6 +85,7 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 				return false;
 			}
 		}
+		consume(matchNext.length() - 1);
 		return true;
 	}
 
