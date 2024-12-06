@@ -7,7 +7,6 @@ import java.util.concurrent.BlockingQueue;
 
 import jneon.compiler.tokens.Token;
 import jneon.compiler.tokens.TokenType;
-import jneon.exceptions.CompileTimeException;
 import jneon.exceptions.TokenisationException;
 import reading.ReadException;
 import reading.impl.CharReader;
@@ -92,7 +91,7 @@ public class Tokeniser {
 		throw new TokenisationException("Failed to create token (last char read: " + reader.peek().getChar() + ")");
 	}
 
-	private Optional<Token> parseString() throws ReadException, CompileTimeException {
+	private Optional<Token> parseString() throws ReadException, TokenisationException {
 		if(!reader.consumeIfMatches('"')) {
 			return Optional.empty();
 		}
@@ -111,7 +110,7 @@ public class Tokeniser {
 			}else if(c.matches('\\')) {
 				escapeSequence = true;
 			}else if(c.isEndOfFile()) {
-				throw new CompileTimeException("End of file reading string");
+				throw new TokenisationException("End of file reading string");
 			}else {
 				parsedString.append(c.getChar());
 			}
@@ -122,7 +121,7 @@ public class Tokeniser {
 		return Optional.of(new Token(TokenType.STRING_LITERAL, parsedString.toString()));
 	}
 	
-	private char parseEscapeSequence(char c) throws CompileTimeException {
+	private char parseEscapeSequence(char c) throws TokenisationException {
 		if(c == 'b') {
 			return '\b';
 		}else if(c == 't') {
@@ -140,7 +139,7 @@ public class Tokeniser {
 		}else if(c == '\\') {
 			return '\\';
 		}else {
-			throw new CompileTimeException("Invalid escape sequence: \\" + c + " (valid ones are \\b  \\t  \\n  \\f  \\r  \\\"  \\'  \\\\)");
+			throw new TokenisationException("Invalid escape sequence: \\" + c + " (valid ones are \\b  \\t  \\n  \\f  \\r  \\\"  \\'  \\\\)");
 		}
 	}
 
@@ -163,7 +162,7 @@ public class Tokeniser {
 	}
 
 	/** Parse a keyword or a reference. */
-	private Optional<Token> parseWord() throws ReadException, CompileTimeException {
+	private Optional<Token> parseWord() throws ReadException, TokenisationException {
 		final StringBuilder word = new StringBuilder();
 		boolean expectWord = false;
 
@@ -180,11 +179,11 @@ public class Tokeniser {
 		}
 	}
 	
-	private boolean readWordChar(StringBuilder word, boolean start) throws ReadException {
+	private boolean readWordChar(StringBuilder word, boolean start) throws ReadException, TokenisationException {
 		final MatchableChar c = reader.peek();
 
 		if(c.isEndOfFile()) {
-			throw new CompileTimeException("Unexpected end of file (reading word)");
+			throw new TokenisationException("Unexpected end of file (reading word)");
 		}else if((start && Character.isJavaIdentifierStart(c.getChar())) ||
 				(!start && Character.isJavaIdentifierPart(c.getChar()))) {
 			word.append(c.getChar());
@@ -204,9 +203,9 @@ public class Tokeniser {
 		}
 	}
 
-	private <T> Optional<T> failOrEmpty(boolean expect, String failureMessage) throws CompileTimeException {
+	private <T> Optional<T> failOrEmpty(boolean expect, String failureMessage) throws TokenisationException {
 		if(expect) {
-			throw new CompileTimeException(failureMessage);
+			throw new TokenisationException(failureMessage);
 		}else {
 			return Optional.empty();
 		}

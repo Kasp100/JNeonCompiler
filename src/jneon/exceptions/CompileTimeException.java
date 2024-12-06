@@ -1,8 +1,8 @@
 package jneon.exceptions;
 
-public class CompileTimeException extends RuntimeException {
+public class CompileTimeException extends Exception {
 
-	private static final long serialVersionUID = 9208389327810656687L;
+	private static final long serialVersionUID = -2020350219772795066L;
 
 	public CompileTimeException() {
 		super();
