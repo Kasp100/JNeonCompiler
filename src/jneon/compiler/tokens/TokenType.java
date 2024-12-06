@@ -14,6 +14,8 @@ public enum TokenType {
 	GREATER_THAN(">"),
 	ROUND_OPEN("("),
 	ROUND_CLOSE(")"),
+	ASSIGNMENT("="),
+	EQUALITY("=="),
 	PACKAGE_DECL("pkg"),
 	IMPORT("import"),
 	CLASS_DECL("class"),

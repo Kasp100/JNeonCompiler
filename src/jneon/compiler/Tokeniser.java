@@ -83,8 +83,7 @@ public class Tokeniser {
 			}
 		}
 
-		if(reader.peek(0).matches(':') && reader.peek(1).matches(':')) {
-			reader.consume(1);
+		if(reader.consumeAllIfNext("::")) {
 			return new Token(TokenType.STATIC_ACCESSOR);
 		}
 
