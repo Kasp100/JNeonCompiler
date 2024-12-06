@@ -49,6 +49,9 @@ public class Tokeniser {
 	}
 
 	private Token tokeniseCurrent() throws ReadException, TokenisationException {
+
+		skipComment();
+
 		{
 			final Optional<Token> parsedBracket = parseBracket();
 			if(parsedBracket.isPresent()) {
@@ -207,6 +210,21 @@ public class Tokeniser {
 			throw new CompileTimeException(failureMessage);
 		}else {
 			return Optional.empty();
+		}
+	}
+	
+	private void skipComment() throws ReadException {
+		if(reader.consumeAllIfNext("/*")) {
+			while(!reader.consumeAllIfNext("*/"))// Read until comment ends
+			{
+				reader.consume();
+			}
+		}
+		if(reader.consumeAllIfNext("//")) {
+			while(!reader.consumeIfMatches('\n'))// Read until next line
+			{
+				reader.consume();
+			}
 		}
 	}
 
