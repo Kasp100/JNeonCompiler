@@ -13,7 +13,7 @@ public class JNeonTopNode implements Serializable {
 
 	private final Set<PkgNode> pkgs = new HashSet<>();
 
-	public void addPackage(PkgNode p) {
+	public void addPackage(PkgNode p) throws CompileTimeException {
 		if(!pkgs.add(p)) {
 			throw new CompileTimeException("Duplicate root package");
 		}

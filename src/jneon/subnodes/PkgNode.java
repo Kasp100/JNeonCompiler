@@ -32,13 +32,13 @@ public class PkgNode implements Serializable {
 		return name;
 	}
 
-	public void attach(TypeNode type) {
+	public void attach(TypeNode type) throws CompileTimeException {
 		if(!types.add(type)) {
 			throw new CompileTimeException("Duplicate type signature");
 		}
 	}
 
-	public void attach(PkgNode sub) {
+	public void attach(PkgNode sub) throws CompileTimeException {
 		if(!subpkgs.add(sub)) {
 			throw new CompileTimeException("Duplicate package name");
 		}
