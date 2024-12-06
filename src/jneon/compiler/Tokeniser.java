@@ -86,6 +86,14 @@ public class Tokeniser {
 		if(reader.consumeAllIfNext("::")) {
 			return new Token(TokenType.STATIC_ACCESSOR);
 		}
+		
+		if(reader.consumeAllIfNext("==")) {
+			return new Token(TokenType.EQUALITY);
+		}
+
+		if(reader.consumeIfMatches('=')) {
+			return new Token(TokenType.ASSIGNMENT);
+		}
 
 		throw new TokenisationException("Failed to create token (last char read: " + reader.peek().getChar() + ")");
 	}
