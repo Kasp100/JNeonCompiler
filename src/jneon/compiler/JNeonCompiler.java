@@ -36,7 +36,7 @@ public class JNeonCompiler {
 		}
 	}
 	
-	public void tokeniseAndBuildAST(InputStreamReader reader) {
+	private void tokeniseAndBuildAST(InputStreamReader reader) {
 		buildAST(new Tokeniser(reader).getTokenReader());
 	}
 
