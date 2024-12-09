@@ -16,6 +16,12 @@ public class Tokeniser {
 
 	private static final int TOKEN_QUEUE_CAPACITY = 127;
 
+	private static final String BIN_NUMBER_PREFIX = "0b";
+	private static final String BIN_NUMBER_CHARS = "01";
+	private static final String HEX_NUMBER_PREFIX = "0x";
+	private static final String HEX_NUMBER_CHARS = "01234656789abcdef";
+	private static final String DEC_NUMBER_CHARS = "0123456789";
+
 	private final CharReader reader;
 	private final BlockingQueue<Token> tokenQueue = new ArrayBlockingQueue<>(TOKEN_QUEUE_CAPACITY);
 	private final TokenReader tokenReader = new TokenReader(tokenQueue);
@@ -51,6 +57,13 @@ public class Tokeniser {
 			final Optional<Token> parsedBracket = parseBracket();
 			if(parsedBracket.isPresent()) {
 				return parsedBracket.get();
+			}
+		}
+
+		{
+			final Optional<Token> parsedNumberLit = parseNumber();
+			if(parsedNumberLit.isPresent()) {
+				return parsedNumberLit.get();
 			}
 		}
 
@@ -93,6 +106,40 @@ public class Tokeniser {
 		}
 
 		throw new TokenisationException("Failed to create token (last char read: " + reader.peek().getChar() + ")");
+	}
+
+	private Optional<Token> parseNumber() throws ReadException, TokenisationException {
+		if(reader.consumeAllIfNext(HEX_NUMBER_PREFIX)) {
+			return parseNumberSuffix(HEX_NUMBER_PREFIX, HEX_NUMBER_CHARS);
+		}else if(reader.consumeAllIfNext(BIN_NUMBER_PREFIX)) {
+			return parseNumberSuffix(BIN_NUMBER_PREFIX, BIN_NUMBER_CHARS);
+		}else {
+			return parseNumberSuffix("", DEC_NUMBER_CHARS);
+		}
+	}
+	
+	private Optional<Token> parseNumberSuffix(String prefix, String validDigits) throws ReadException {
+		if(!isDigit(reader.peek(), validDigits) &&
+				!(reader.peek(0).matches('.') && isDigit(reader.peek(1), validDigits))) {
+			return Optional.empty();
+		}
+		final StringBuilder number = new StringBuilder();
+
+		boolean fractionReached = false;
+		do {
+			if(reader.peek().matches('.')) {
+				fractionReached = true;
+			}
+			number.append(reader.consume().getChar());
+		} while(isDigit(reader.peek(), validDigits) ||
+				reader.consumeIfMatches('_') ||
+				(!fractionReached && reader.peek().matches('.')));
+
+		return Optional.of(new Token(TokenType.NUMERIC_LITERAL, number.toString()));
+	}
+	
+	private boolean isDigit(MatchableChar c, String validDigits) {
+		return validDigits.contains("" + c.getChar());
 	}
 
 	private Optional<Token> parseString() throws ReadException, TokenisationException {
