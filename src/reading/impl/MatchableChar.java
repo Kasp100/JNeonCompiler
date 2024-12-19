@@ -16,6 +16,11 @@ public class MatchableChar implements Matchable<MatchableChar> {
 		this.endOfFile = false;
 	}
 
+	public MatchableChar(MatchableChar other) {
+		this.c = other.c;
+		this.endOfFile = other.endOfFile;
+	}
+
 	private MatchableChar() {
 		this.c = 0;
 		endOfFile = true;
