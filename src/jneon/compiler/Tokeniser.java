@@ -26,7 +26,7 @@ public class Tokeniser {
 	private final BlockingQueue<Token> tokenQueue = new ArrayBlockingQueue<>(TOKEN_QUEUE_CAPACITY);
 	private final TokenReader tokenReader = new TokenReader(tokenQueue);
 
-	public Tokeniser(InputStreamReader reader, boolean includeSourceCodePositions) {
+	public Tokeniser(InputStreamReader reader) {
 		this.reader = new CharReader(reader);
 		new Thread(this::tokenise, "tokenising").start();
 	}

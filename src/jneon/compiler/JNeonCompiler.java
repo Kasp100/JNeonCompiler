@@ -32,12 +32,12 @@ public class JNeonCompiler {
 
 	private void tokeniseAndBuildAST(File file) throws FileNotFoundException, IOException {
 		try(final FileReader reader = new FileReader(file, charset)) {
-			tokeniseAndBuildAST(reader, file.getCanonicalPath());
+			tokeniseAndBuildAST(reader);
 		}
 	}
 	
-	private void tokeniseAndBuildAST(InputStreamReader reader, String fileName) {
-		buildAST(new Tokeniser(reader, true).getTokenReader());
+	private void tokeniseAndBuildAST(InputStreamReader reader) {
+		buildAST(new Tokeniser(reader).getTokenReader());
 	}
 
 	private void buildAST(TokenReader tr) {

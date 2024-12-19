@@ -10,13 +10,9 @@ public class Token implements Matchable<TokenType> {
 	private final TokenType type;
 	private final Optional<String> content;
 
-	public Token(TokenType type, Optional<String> content) {
+	private Token(TokenType type, Optional<String> content) {
 		this.type = Objects.requireNonNull(type);
 		this.content = Objects.requireNonNull(content);
-	}
-
-	public Token(Token other) {
-		this(other.getType(), other.getContent());
 	}
 
 	public Token(TokenType type) {
