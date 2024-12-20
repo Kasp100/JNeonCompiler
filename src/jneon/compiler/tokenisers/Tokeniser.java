@@ -1,10 +1,11 @@
-package jneon.compiler;
+package jneon.compiler.tokenisers;
 
-import java.io.InputStreamReader;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import jneon.compiler.TokenReader;
 import jneon.compiler.tokens.Token;
 import jneon.compiler.tokens.TokenType;
 import jneon.exceptions.TokenisationException;
@@ -26,8 +27,8 @@ public class Tokeniser {
 	private final BlockingQueue<Token> tokenQueue = new ArrayBlockingQueue<>(TOKEN_QUEUE_CAPACITY);
 	private final TokenReader tokenReader = new TokenReader(tokenQueue);
 
-	public Tokeniser(InputStreamReader reader) {
-		this.reader = new CharReader(reader);
+	public Tokeniser(CharReader reader) {
+		this.reader = Objects.requireNonNull(reader);
 		new Thread(this::tokenise, "tokenising").start();
 	}
 
@@ -52,7 +53,7 @@ public class Tokeniser {
 		return tokenReader;
 	}
 
-	private Token tokeniseCurrent() throws ReadException, TokenisationException {
+	protected Token tokeniseCurrent() throws ReadException, TokenisationException {
 		{
 			final Optional<Token> parsedBracket = parseBracket();
 			if(parsedBracket.isPresent()) {
