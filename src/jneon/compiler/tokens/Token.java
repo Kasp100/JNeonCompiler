@@ -4,27 +4,31 @@ import java.util.Objects;
 import java.util.Optional;
 
 import reading.Matchable;
+import reading.impl.SourceDocPos;
 
 public class Token implements Matchable<TokenType> {
 
 	private final TokenType type;
 	private final Optional<String> content;
 
-	public Token(TokenType type, Optional<String> content) {
+	private final SourceDocPos pos;
+
+	public Token(TokenType type, Optional<String> content, SourceDocPos pos) {
 		this.type = Objects.requireNonNull(type);
 		this.content = Objects.requireNonNull(content);
+		this.pos = Objects.requireNonNull(pos);
 	}
 
 	public Token(Token other) {
-		this(other.getType(), other.getContent());
+		this(other.getType(), other.getContent(), other.getPos());
 	}
 
-	public Token(TokenType type) {
-		this(type, Optional.empty());
+	public Token(TokenType type, SourceDocPos pos) {
+		this(type, Optional.empty(), pos);
 	}
 
-	public Token(TokenType type, String content) {
-		this(type, Optional.of(content));
+	public Token(TokenType type, String content, SourceDocPos pos) {
+		this(type, Optional.of(content), pos);
 	}
 
 	public TokenType getType() {
@@ -33,6 +37,10 @@ public class Token implements Matchable<TokenType> {
 
 	public Optional<String> getContent() {
 		return content;
+	}
+
+	public SourceDocPos getPos() {
+		return pos;
 	}
 
 	@Override
@@ -60,9 +68,9 @@ public class Token implements Matchable<TokenType> {
 	@Override
 	public String toString() {
 		if(content.isPresent()) {
-			return "[" + type + " \"" + content.get() + "\"]";
+			return "[" + type + " \"" + content.get() + "\" (" + pos + ")]";
 		}else {
-			return "[" + type + "]";
+			return "[" + type + " (" + pos + ")]";
 		}
 	}
 

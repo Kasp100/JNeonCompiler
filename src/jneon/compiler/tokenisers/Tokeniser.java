@@ -10,7 +10,7 @@ import jneon.compiler.tokens.Token;
 import jneon.compiler.tokens.TokenType;
 import jneon.exceptions.TokenisationException;
 import reading.ReadException;
-import reading.impl.CharReader;
+import reading.impl.CharReaderWSourceDocPos;
 import reading.impl.MatchableChar;
 
 public class Tokeniser {
@@ -23,11 +23,11 @@ public class Tokeniser {
 	private static final String HEX_NUMBER_CHARS = "01234656789abcdef";
 	private static final String DEC_NUMBER_CHARS = "0123456789";
 
-	private final CharReader reader;
+	private final CharReaderWSourceDocPos reader;
 	private final BlockingQueue<Token> tokenQueue = new ArrayBlockingQueue<>(TOKEN_QUEUE_CAPACITY);
 	private final TokenReader tokenReader = new TokenReader(tokenQueue);
 
-	public Tokeniser(CharReader reader) {
+	public Tokeniser(CharReaderWSourceDocPos reader) {
 		this.reader = Objects.requireNonNull(reader);
 		new Thread(this::tokenise, "tokenising").start();
 	}
@@ -52,8 +52,16 @@ public class Tokeniser {
 	public TokenReader getTokenReader() {
 		return tokenReader;
 	}
+	
+	private Token createToken(TokenType type) {
+		return new Token(type, reader.getSourceDocPos());
+	}
+	
+	private Token createToken(TokenType type, String content) {
+		return new Token(type, content, reader.getSourceDocPos());
+	}
 
-	protected Token tokeniseCurrent() throws ReadException, TokenisationException {
+	private Token tokeniseCurrent() throws ReadException, TokenisationException {
 		{
 			final Optional<Token> parsedBracket = parseBracket();
 			if(parsedBracket.isPresent()) {
@@ -76,15 +84,15 @@ public class Tokeniser {
 		}
 
 		if(reader.consumeIfMatches(';')) {
-			return new Token(TokenType.END_STATEMENT);
+			return createToken(TokenType.END_STATEMENT);
 		}
 
 		if(reader.consumeIfMatches(',')) {
-			return new Token(TokenType.COMMA);
+			return createToken(TokenType.COMMA);
 		}
 
 		if(reader.consumeAllIfNext("mut:")) {
-			return new Token(TokenType.MUTABLE_REF);
+			return createToken(TokenType.MUTABLE_REF);
 		}
 
 		{
@@ -95,15 +103,15 @@ public class Tokeniser {
 		}
 
 		if(reader.consumeAllIfNext("::")) {
-			return new Token(TokenType.STATIC_ACCESSOR);
+			return createToken(TokenType.STATIC_ACCESSOR);
 		}
 		
 		if(reader.consumeAllIfNext("==")) {
-			return new Token(TokenType.EQUALITY);
+			return createToken(TokenType.EQUALITY);
 		}
 
 		if(reader.consumeIfMatches('=')) {
-			return new Token(TokenType.ASSIGNMENT);
+			return createToken(TokenType.ASSIGNMENT);
 		}
 
 		throw new TokenisationException("Failed to create token (last char read: " + reader.peek().getChar() + ")");
@@ -136,7 +144,7 @@ public class Tokeniser {
 				reader.consumeIfMatches('_') ||
 				(!fractionReached && reader.peek().matches('.')));
 
-		return Optional.of(new Token(TokenType.NUMERIC_LITERAL, number.toString()));
+		return Optional.of(createToken(TokenType.NUMERIC_LITERAL, number.toString()));
 	}
 	
 	private boolean isDigit(MatchableChar c, String validDigits) {
@@ -170,7 +178,7 @@ public class Tokeniser {
 			c = reader.consume();
 		}
 
-		return Optional.of(new Token(TokenType.STRING_LITERAL, parsedString.toString()));
+		return Optional.of(createToken(TokenType.STRING_LITERAL, parsedString.toString()));
 	}
 	
 	private char parseEscapeSequence(char c) throws TokenisationException {
@@ -197,17 +205,17 @@ public class Tokeniser {
 
 	private Optional<Token> parseBracket() throws ReadException {
 		if(reader.consumeIfMatches('{')) {
-			return Optional.of(new Token(TokenType.CURLY_OPEN));
+			return Optional.of(createToken(TokenType.CURLY_OPEN));
 		}else if(reader.consumeIfMatches('}')) {
-			return Optional.of(new Token(TokenType.CURLY_CLOSE));
+			return Optional.of(createToken(TokenType.CURLY_CLOSE));
 		}else if(reader.consumeIfMatches('<')) {
-			return Optional.of(new Token(TokenType.SMALLER_THAN));
+			return Optional.of(createToken(TokenType.SMALLER_THAN));
 		}else if(reader.consumeIfMatches('>')) {
-			return Optional.of(new Token(TokenType.GREATER_THAN));
+			return Optional.of(createToken(TokenType.GREATER_THAN));
 		}else if(reader.consumeIfMatches('(')) {
-			return Optional.of(new Token(TokenType.ROUND_OPEN));
+			return Optional.of(createToken(TokenType.ROUND_OPEN));
 		}else if(reader.consumeIfMatches(')')) {
-			return Optional.of(new Token(TokenType.ROUND_CLOSE));
+			return Optional.of(createToken(TokenType.ROUND_CLOSE));
 		}else {
 			return Optional.empty();
 		}
@@ -249,9 +257,9 @@ public class Tokeniser {
 	private Token parseKeywordOrReference(String word) {
 		final Optional<TokenType> tt = TokenType.match(word);
 		if(tt.isPresent()) {
-			return new Token(tt.get());
+			return createToken(tt.get());
 		}else {
-			return new Token(TokenType.REFERENCE, word);
+			return createToken(TokenType.REFERENCE, word);
 		}
 	}
 

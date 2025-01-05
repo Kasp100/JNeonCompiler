@@ -8,10 +8,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
 import jneon.JNeonTopNode;
-import jneon.compiler.tokenisers.DebugTokeniser;
 import jneon.compiler.tokenisers.Tokeniser;
 import reading.ReadException;
-import reading.impl.CharReader;
 import reading.impl.CharReaderWSourceDocPos;
 
 public class JNeonCompiler {
@@ -29,25 +27,19 @@ public class JNeonCompiler {
 
 	public void compile(boolean includeSourceCodePos, File... sourceFiles) throws FileNotFoundException, IOException {
 		for(File file : sourceFiles) {
-			tokeniseAndBuildAST(file, includeSourceCodePos);
+			tokeniseAndBuildAST(file);
 		}
 		resolveReferences();
 	}
 
-	private void tokeniseAndBuildAST(File file, boolean includeSourceCodePos) throws FileNotFoundException, IOException {
+	private void tokeniseAndBuildAST(File file) throws FileNotFoundException, IOException {
 		try(final FileReader reader = new FileReader(file, charset)) {
-			tokeniseAndBuildAST(reader, file.getCanonicalPath(), includeSourceCodePos);
+			tokeniseAndBuildAST(reader, file.getCanonicalPath());
 		}
 	}
 	
-	private void tokeniseAndBuildAST(InputStreamReader reader, String fileName, boolean includeSourceCodePos) {
-		final Tokeniser tokeniser;
-
-		if(includeSourceCodePos) {
-			tokeniser = new DebugTokeniser(new CharReaderWSourceDocPos(reader, fileName));
-		}else {
-			tokeniser = new Tokeniser(new CharReader(reader));
-		}
+	private void tokeniseAndBuildAST(InputStreamReader reader, String fileName) {
+		final Tokeniser tokeniser = new Tokeniser(new CharReaderWSourceDocPos(reader, fileName));
 		
 		buildAST(tokeniser.getTokenReader());
 	}
