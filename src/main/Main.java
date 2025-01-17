@@ -14,7 +14,7 @@ public class Main {
 
 	public void run(String... args) {
 		try {
-			new JNeonCompiler(StandardCharsets.UTF_8).compile(true, convertToFiles(args));
+			new JNeonCompiler(StandardCharsets.UTF_8).compile(convertToFiles(args));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -25,7 +25,7 @@ public class JNeonCompiler {
 		return topNode;
 	}
 
-	public void compile(boolean includeSourceCodePos, File... sourceFiles) throws FileNotFoundException, IOException {
+	public void compile(File... sourceFiles) throws FileNotFoundException, IOException {
 		for(File file : sourceFiles) {
 			tokeniseAndBuildAST(file);
 		}
