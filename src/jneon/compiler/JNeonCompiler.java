@@ -9,49 +9,38 @@ import java.nio.charset.Charset;
 
 import jneon.JNeonTopNode;
 import jneon.compiler.tokenisers.Tokeniser;
-import reading.ReadException;
 import reading.impl.CharReaderWSourceDocPos;
 
 public class JNeonCompiler {
 
-	private final JNeonTopNode topNode = new JNeonTopNode();
 	private final Charset charset;
 
 	public JNeonCompiler(Charset charset) {
 		this.charset = charset;
 	}
 
-	public JNeonTopNode getTopNode() {
-		return topNode;
-	}
-
-	public void compile(File... sourceFiles) throws FileNotFoundException, IOException {
+	public JNeonTopNode compile(File... sourceFiles) throws FileNotFoundException, IOException {
+		final JNeonTopNode.Builder builder = new JNeonTopNode.Builder();
 		for(File file : sourceFiles) {
-			tokeniseAndBuildAST(file);
+			tokeniseAndBuildAST(builder, file);
 		}
 		resolveReferences();
+		return builder.build();
 	}
 
-	private void tokeniseAndBuildAST(File file) throws FileNotFoundException, IOException {
+	private void tokeniseAndBuildAST(JNeonTopNode.Builder builder, File file) throws FileNotFoundException, IOException {
 		try(final FileReader reader = new FileReader(file, charset)) {
-			tokeniseAndBuildAST(reader, file.getCanonicalPath());
+			tokeniseAndBuildAST(builder, reader, file.getCanonicalPath());
 		}
 	}
 	
-	private void tokeniseAndBuildAST(InputStreamReader reader, String fileName) {
+	private void tokeniseAndBuildAST(JNeonTopNode.Builder builder, InputStreamReader reader, String fileName) {
 		final Tokeniser tokeniser = new Tokeniser(new CharReaderWSourceDocPos(reader, fileName));
-		
-		buildAST(tokeniser.getTokenReader());
+		buildAST(builder, tokeniser.getTokenReader());
 	}
 
-	private void buildAST(TokenReader tr) {
-		while(!tr.endOfFileReached()) {
-			try {
-				System.out.println(tr.consume());
-			} catch (ReadException e) {
-				e.printStackTrace();
-			}
-		}
+	private void buildAST(JNeonTopNode.Builder builder, TokenReader tr) {
+		
 	}
 
 	private void resolveReferences() {
