@@ -12,6 +12,7 @@ public class CharReader {
 	public static final char END_OF_FILE = 0;
 
 	private final InputStreamReader reader;
+	private boolean endOfFileReached = false;
 
 	private final List<Character> unconsumedReadChars = new ArrayList<>();
 
@@ -58,9 +59,13 @@ public class CharReader {
 	}
 	
 	private char readNext() throws IOException {
+		if(endOfFileReached) {
+			return END_OF_FILE;
+		}
 		final int charRead = reader.read();
 
 		if(charRead == -1) {
+			endOfFileReached = true;
 			return END_OF_FILE;
 		}else {
 			return (char) charRead;
