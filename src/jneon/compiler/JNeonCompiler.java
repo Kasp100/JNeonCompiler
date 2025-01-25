@@ -1,14 +1,17 @@
 package jneon.compiler;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.function.Consumer;
 
 import jneon.JNeonRootNode;
+import jneon.compiler.ast.ASTBuilder;
 import jneon.compiler.tokenisers.Tokeniser;
+import jneon.exceptions.CompileTimeException;
+import reading.ReadException;
 import reading.impl.CharReaderWSourceDocPos;
 
 public class JNeonCompiler {
@@ -19,28 +22,53 @@ public class JNeonCompiler {
 		this.charset = charset;
 	}
 
-	public JNeonRootNode compile(File... sourceFiles) throws FileNotFoundException, IOException {
+	public JNeonRootNode compile(Consumer<Exception> exceptionHandler, File... sourceFiles) {
 		final JNeonRootNode.Builder builder = new JNeonRootNode.Builder();
 		for(File file : sourceFiles) {
-			tokeniseAndBuildAST(builder, file);
+			tokeniseAndBuildAST(exceptionHandler, builder, file);
 		}
 		resolveReferences();
 		return builder.build();
 	}
 
-	private void tokeniseAndBuildAST(JNeonRootNode.Builder builder, File file) throws FileNotFoundException, IOException {
-		tokeniseAndBuildAST(builder, () -> {
-			return new FileReader(file, charset);
-		}, file.getCanonicalPath());
+	private void tokeniseAndBuildAST(
+			Consumer<Exception> exceptionHandler,
+			JNeonRootNode.Builder builder,
+			File file)
+	{
+		try {
+			tokeniseAndBuildAST(
+					exceptionHandler,
+					builder, () -> { return new FileReader(file, charset); },
+					file.getCanonicalPath());
+		} catch (IOException e) {
+			exceptionHandler.accept(e);
+		}
 	}
 
-	private void tokeniseAndBuildAST(JNeonRootNode.Builder builder, ResourcePromise<InputStreamReader, IOException> reader, String fileName) {
-		final Tokeniser tokeniser = new Tokeniser(() -> new CharReaderWSourceDocPos(reader.create(), fileName));
-		buildAST(builder, tokeniser.getTokenReader());
+	private void tokeniseAndBuildAST(
+			Consumer<Exception> exceptionHandler,
+			JNeonRootNode.Builder builder,
+			ResourcePromise<InputStreamReader, IOException> readerPromise,
+			String fileName)
+	{
+		final Tokeniser tokeniser = new Tokeniser(exceptionHandler,
+				() -> new CharReaderWSourceDocPos(readerPromise.create(), fileName));
+		final TokenReader reader = tokeniser.getTokenReader();
+		try {
+			buildAST(builder, reader);
+		} catch (ReadException | CompileTimeException e1) {
+			try {
+				final String msg = e1.getMessage() + " at " + reader.peek().getPos().toString();
+				exceptionHandler.accept(new CompileTimeException(msg));
+			} catch (ReadException e2) {
+				exceptionHandler.accept(new CompileTimeException(e1));
+			}
+		}
 	}
 
-	private void buildAST(JNeonRootNode.Builder builder, TokenReader tr) {
-		
+	private void buildAST(JNeonRootNode.Builder builder, TokenReader tr) throws ReadException, CompileTimeException {
+		 new ASTBuilder().build(builder, tr);
 	}
 
 	private void resolveReferences() {

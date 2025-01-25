@@ -1,7 +1,6 @@
 package main;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import jneon.compiler.JNeonCompiler;
@@ -13,11 +12,9 @@ public class Main {
 	}
 
 	public void run(String... args) {
-		try {
-			new JNeonCompiler(StandardCharsets.UTF_8).compile(convertToFiles(args));
-		} catch (IOException e) {
+		new JNeonCompiler(StandardCharsets.UTF_8).compile((e) -> {
 			e.printStackTrace();
-		}
+		}, convertToFiles(args));
 	}
 	
 	private File[] convertToFiles(String... paths) {

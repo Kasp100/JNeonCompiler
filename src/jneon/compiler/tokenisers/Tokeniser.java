@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Consumer;
 
 import jneon.compiler.ResourcePromise;
 import jneon.compiler.TokenReader;
@@ -25,14 +26,20 @@ public class Tokeniser {
 	private static final String HEX_NUMBER_CHARS = "01234656789abcdef";
 	private static final String DEC_NUMBER_CHARS = "0123456789";
 
+	private final Consumer<Exception> exceptionHandler;
 	private final ResourcePromise<CharReaderWSourceDocPos, IOException> readerPromise;
+
 	private final BlockingQueue<Token> tokenQueue = new ArrayBlockingQueue<>(TOKEN_QUEUE_CAPACITY);
 	private final TokenReader tokenReader = new TokenReader(tokenQueue);
 
 	private CharReaderWSourceDocPos reader;
 
-	public Tokeniser(ResourcePromise<CharReaderWSourceDocPos, IOException> reader) {
-		this.readerPromise = Objects.requireNonNull(reader);
+	public Tokeniser(
+			Consumer<Exception> exceptionHandler,
+			ResourcePromise<CharReaderWSourceDocPos, IOException> readerPromise)
+	{
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler);
+		this.readerPromise = Objects.requireNonNull(readerPromise);
 		new Thread(this::tokenise, "tokenising").start();
 	}
 
@@ -47,8 +54,7 @@ public class Tokeniser {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Tokenisation failed!");
-			e.printStackTrace();
+			exceptionHandler.accept(e);
 		}
 
 		tokenReader.triggerEndOfFile();
