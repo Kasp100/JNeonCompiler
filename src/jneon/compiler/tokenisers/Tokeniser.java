@@ -1,10 +1,12 @@
 package jneon.compiler.tokenisers;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import jneon.compiler.ResourcePromise;
 import jneon.compiler.TokenReader;
 import jneon.compiler.tokens.Token;
 import jneon.compiler.tokens.TokenType;
@@ -23,17 +25,20 @@ public class Tokeniser {
 	private static final String HEX_NUMBER_CHARS = "01234656789abcdef";
 	private static final String DEC_NUMBER_CHARS = "0123456789";
 
-	private final CharReaderWSourceDocPos reader;
+	private final ResourcePromise<CharReaderWSourceDocPos, IOException> readerPromise;
 	private final BlockingQueue<Token> tokenQueue = new ArrayBlockingQueue<>(TOKEN_QUEUE_CAPACITY);
 	private final TokenReader tokenReader = new TokenReader(tokenQueue);
 
-	public Tokeniser(CharReaderWSourceDocPos reader) {
-		this.reader = Objects.requireNonNull(reader);
+	private CharReaderWSourceDocPos reader;
+
+	public Tokeniser(ResourcePromise<CharReaderWSourceDocPos, IOException> reader) {
+		this.readerPromise = Objects.requireNonNull(reader);
 		new Thread(this::tokenise, "tokenising").start();
 	}
 
 	private void tokenise() {
-		try {
+		try(CharReaderWSourceDocPos reader = readerPromise.create()) {
+			this.reader = reader;
 			while(!reader.endOfFileReached()) {
 				if(Character.isWhitespace(reader.peek())) {
 					reader.consume();

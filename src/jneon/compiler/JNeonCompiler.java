@@ -29,13 +29,13 @@ public class JNeonCompiler {
 	}
 
 	private void tokeniseAndBuildAST(JNeonRootNode.Builder builder, File file) throws FileNotFoundException, IOException {
-		try(final FileReader reader = new FileReader(file, charset)) {
-			tokeniseAndBuildAST(builder, reader, file.getCanonicalPath());
-		}
+		tokeniseAndBuildAST(builder, () -> {
+			return new FileReader(file, charset);
+		}, file.getCanonicalPath());
 	}
-	
-	private void tokeniseAndBuildAST(JNeonRootNode.Builder builder, InputStreamReader reader, String fileName) {
-		final Tokeniser tokeniser = new Tokeniser(new CharReaderWSourceDocPos(reader, fileName));
+
+	private void tokeniseAndBuildAST(JNeonRootNode.Builder builder, ResourcePromise<InputStreamReader, IOException> reader, String fileName) {
+		final Tokeniser tokeniser = new Tokeniser(() -> new CharReaderWSourceDocPos(reader.create(), fileName));
 		buildAST(builder, tokeniser.getTokenReader());
 	}
 

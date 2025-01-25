@@ -7,7 +7,7 @@ import java.util.List;
 
 import reading.ReadException;
 
-public class CharReader {
+public class CharReader implements AutoCloseable {
 
 	public static final char END_OF_FILE = 0;
 
@@ -104,6 +104,11 @@ public class CharReader {
 
 	protected char consumeNext() {
 		return unconsumedReadChars.remove(0);
+	}
+
+	@Override
+	public void close() throws Exception {
+		reader.close();
 	}
 
 }
