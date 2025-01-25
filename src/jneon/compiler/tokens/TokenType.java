@@ -49,7 +49,9 @@ public enum TokenType {
 	CLASS_SERIALISABLE("serialisable"),
 	RETURN("ret"),
 	END_STATEMENT(";"),
-	COMMA(",");
+	COMMA(","),
+	GRAMMAR("grammar"),
+	PARSE("parse");
 
 	/** An array of the primary syntax followed by the aliases. */
 	private final String[] syntax;
