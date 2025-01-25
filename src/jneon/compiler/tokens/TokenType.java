@@ -25,7 +25,7 @@ public enum TokenType {
 	VAR("var"),
 	BOOL_LIT_TRUE("true"),
 	BOOL_LIT_FALSE("false"),
-	UINT("#uint", "nat"),
+	UINT("#uint", "#nat"),
 	INT("#int"),
 	CHAR("#char"),
 	BOOL("#bool", "#bit"),
