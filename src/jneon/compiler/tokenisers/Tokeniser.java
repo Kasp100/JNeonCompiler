@@ -10,8 +10,8 @@ import jneon.compiler.tokens.Token;
 import jneon.compiler.tokens.TokenType;
 import jneon.exceptions.TokenisationException;
 import reading.ReadException;
+import reading.impl.CharReader;
 import reading.impl.CharReaderWSourceDocPos;
-import reading.impl.MatchableChar;
 
 public class Tokeniser {
 
@@ -35,7 +35,7 @@ public class Tokeniser {
 	private void tokenise() {
 		try {
 			while(!reader.endOfFileReached()) {
-				if(Character.isWhitespace(reader.peek().getChar())) {
+				if(Character.isWhitespace(reader.peek())) {
 					reader.consume();
 				}else if(!skipComment()) {
 					tokenQueue.add(tokeniseCurrent());
@@ -114,7 +114,7 @@ public class Tokeniser {
 			return createToken(TokenType.ASSIGNMENT);
 		}
 
-		throw new TokenisationException("Failed to create token (last char read: " + reader.peek().getChar() + ")");
+		throw new TokenisationException("Failed to create token (last char read: " + reader.peek() + ")");
 	}
 
 	private Optional<Token> parseNumber() throws ReadException, TokenisationException {
@@ -129,26 +129,26 @@ public class Tokeniser {
 	
 	private Optional<Token> parseNumberSuffix(String prefix, String validDigits) throws ReadException {
 		if(!isDigit(reader.peek(), validDigits) &&
-				!(reader.peek(0).matches('.') && isDigit(reader.peek(1), validDigits))) {
+				!(reader.peek(0) == '.' && isDigit(reader.peek(1), validDigits))) {
 			return Optional.empty();
 		}
 		final StringBuilder number = new StringBuilder();
 
 		boolean fractionReached = false;
 		do {
-			if(reader.peek().matches('.')) {
+			if(reader.peek() == '.') {
 				fractionReached = true;
 			}
-			number.append(reader.consume().getChar());
+			number.append(reader.consume());
 		} while(isDigit(reader.peek(), validDigits) ||
 				reader.consumeIfMatches('_') ||
-				(!fractionReached && reader.peek().matches('.')));
+				(!fractionReached && reader.peek() == '.'));
 
 		return Optional.of(createToken(TokenType.NUMERIC_LITERAL, number.toString()));
 	}
 	
-	private boolean isDigit(MatchableChar c, String validDigits) {
-		return validDigits.contains("" + c.getChar());
+	private boolean isDigit(char c, String validDigits) {
+		return validDigits.contains("" + c);
 	}
 
 	private Optional<Token> parseString() throws ReadException, TokenisationException {
@@ -160,19 +160,19 @@ public class Tokeniser {
 
 		boolean escapeSequence = false;
 
-		MatchableChar c = reader.consume();
+		char c = reader.consume();
 
-		while(escapeSequence || !c.matches('"')) {
+		while(escapeSequence || c != '"') {
 
 			if(escapeSequence) {
 				escapeSequence = false;
-				parsedString.append(parseEscapeSequence(c.getChar()));
-			}else if(c.matches('\\')) {
+				parsedString.append(parseEscapeSequence(c));
+			}else if(c == '\\') {
 				escapeSequence = true;
-			}else if(c.isEndOfFile()) {
+			}else if(c == CharReader.END_OF_FILE) {
 				throw new TokenisationException("End of file reading string");
 			}else {
-				parsedString.append(c.getChar());
+				parsedString.append(c);
 			}
 
 			c = reader.consume();
@@ -240,13 +240,13 @@ public class Tokeniser {
 	}
 	
 	private boolean readWordChar(StringBuilder word, boolean start) throws ReadException, TokenisationException {
-		final MatchableChar c = reader.peek();
+		final char c = reader.peek();
 
-		if(c.isEndOfFile()) {
+		if(c == CharReader.END_OF_FILE) {
 			throw new TokenisationException("Unexpected end of file (reading word)");
-		}else if((start && Character.isJavaIdentifierStart(c.getChar())) ||
-				(!start && Character.isJavaIdentifierPart(c.getChar()))) {
-			word.append(c.getChar());
+		}else if((start && Character.isJavaIdentifierStart(c)) ||
+				(!start && Character.isJavaIdentifierPart(c))) {
+			word.append(c);
 			reader.consume();
 			return true;
 		}else {

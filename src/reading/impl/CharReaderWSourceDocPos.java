@@ -13,10 +13,10 @@ public class CharReaderWSourceDocPos extends CharReader {
 	}
 
 	@Override
-	protected MatchableChar consumeNext() {
-		final MatchableChar charRead = super.consumeNext();
+	protected char consumeNext() {
+		final char charRead = super.consumeNext();
 
-		if(charRead.matches('\n')) {
+		if(charRead == '\n') {
 			lineIdx++;
 			colIdx = 0;
 		}else {

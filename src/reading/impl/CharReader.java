@@ -2,27 +2,25 @@ package reading.impl;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
-import reading.PeekNConsumeReader;
 import reading.ReadException;
 
-public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableChar> {
+public class CharReader {
 
-	private static final MatchableChar NEWLINE = new MatchableChar('\n');
+	public static final char END_OF_FILE = 0;
 
 	private final InputStreamReader reader;
 
-	private final List<MatchableChar> unconsumedReadChars = new LinkedList<>();
+	private final List<Character> unconsumedReadChars = new ArrayList<>();
 
 	public CharReader(InputStreamReader reader) {
 		this.reader = reader;
 	}
 
-	@Override
-	public MatchableChar consume(int offset) throws ReadException {
-		final MatchableChar read = peek(offset);
+	public char consume(int offset) throws ReadException {
+		final char read = peek(offset);
 
 		for(int i = 0; i <= offset; i++) {
 			consumeNext();
@@ -31,24 +29,23 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 		return read;
 	}
 
-	@Override
-	public MatchableChar consume() throws ReadException {
+	public char consume() throws ReadException {
 		return consume(0);
 	}
 
-	@Override
-	public MatchableChar peek(int offset) throws ReadException {
+	public char peek(int offset) throws ReadException {
 		try {
 			while(offset >= unconsumedReadChars.size()) {
-				MatchableChar c = readNext();
+				char c = readNext();
 
-				if(c.matches('\r')) {
-					final MatchableChar next = readNext();
-					if(next.matches(NEWLINE)) {
-						c = NEWLINE;
+				// Change "\r" and "\r\n" to "\n"
+				if(c == '\r') {
+					final char next = readNext();
+					if(next == '\n') {
+						c = '\n';
 					}else {
 						c = next;
-						unconsumedReadChars.add(NEWLINE);
+						unconsumedReadChars.add('\n');
 					}
 				}
 
@@ -60,31 +57,28 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 		}
 	}
 	
-	private MatchableChar readNext() throws IOException {
+	private char readNext() throws IOException {
 		final int charRead = reader.read();
 
 		if(charRead == -1) {
-			return MatchableChar.END_OF_FILE;
+			return END_OF_FILE;
 		}else {
-			return new MatchableChar((char) charRead);
+			return (char) charRead;
 		}
 	}
 
-	@Override
-	public MatchableChar peek() throws ReadException {
+	public char peek() throws ReadException {
 		return peek(0);
 	}
-	
-	@Override
+
 	public boolean endOfFileReached() throws ReadException {
-		return peek().isEndOfFile();
+		return peek() == END_OF_FILE;
 	}
 
-	@Override
-	public boolean consumeIfMatches(MatchableChar matching) throws ReadException {
-		final MatchableChar peek = peek();
+	public boolean consumeIfMatches(char matching) throws ReadException {
+		final char peek = peek();
 
-		if(peek.matches(matching)) {
+		if(peek == matching) {
 			consume();
 			return true;
 		}else {
@@ -92,14 +86,10 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 		}
 	}
 
-	public boolean consumeIfMatches(char matching) throws ReadException {
-		return consumeIfMatches(new MatchableChar(matching));
-	}
-
 	public boolean consumeAllIfNext(String matchNext) throws ReadException {
 		peek(matchNext.length() - 1); // Peek last char first for optimisation
 		for(int i = 0; i < matchNext.length(); i++) {
-			if(!peek(i).matches(matchNext.charAt(i))) {
+			if(peek(i) != matchNext.charAt(i)) {
 				return false;
 			}
 		}
@@ -107,7 +97,7 @@ public class CharReader implements PeekNConsumeReader<MatchableChar, MatchableCh
 		return true;
 	}
 
-	protected MatchableChar consumeNext() {
+	protected char consumeNext() {
 		return unconsumedReadChars.remove(0);
 	}
 
