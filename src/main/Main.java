@@ -1,6 +1,7 @@
 package main;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import jneon.compiler.JNeonCompiler;
@@ -11,8 +12,10 @@ public class Main {
 		new Main().run(args);
 	}
 
+	private static final Charset CHARSET = StandardCharsets.UTF_8;
+
 	public void run(String... args) {
-		new JNeonCompiler(StandardCharsets.UTF_8).compile((e) -> {
+		new JNeonCompiler(CHARSET).compile((e) -> {
 			e.printStackTrace();
 		}, convertToFiles(args));
 	}
