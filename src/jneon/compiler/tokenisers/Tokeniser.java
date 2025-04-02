@@ -7,7 +7,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
 
-import jneon.compiler.ResourcePromise;
+import jneon.compiler.ResourceSupplier;
 import jneon.compiler.TokenReader;
 import jneon.compiler.tokens.Token;
 import jneon.compiler.tokens.TokenType;
@@ -27,7 +27,7 @@ public class Tokeniser {
 	private static final String DEC_NUMBER_CHARS = "0123456789";
 
 	private final Consumer<Exception> exceptionHandler;
-	private final ResourcePromise<CharReaderWSourceDocPos, IOException> readerPromise;
+	private final ResourceSupplier<CharReaderWSourceDocPos, IOException> readerPromise;
 
 	private final BlockingQueue<Token> tokenQueue = new ArrayBlockingQueue<>(TOKEN_QUEUE_CAPACITY);
 	private final TokenReader tokenReader = new TokenReader(tokenQueue);
@@ -36,7 +36,7 @@ public class Tokeniser {
 
 	public Tokeniser(
 			Consumer<Exception> exceptionHandler,
-			ResourcePromise<CharReaderWSourceDocPos, IOException> readerPromise)
+			ResourceSupplier<CharReaderWSourceDocPos, IOException> readerPromise)
 	{
 		this.exceptionHandler = Objects.requireNonNull(exceptionHandler);
 		this.readerPromise = Objects.requireNonNull(readerPromise);

@@ -49,7 +49,7 @@ public class JNeonCompiler {
 	private void tokeniseAndBuildAST(
 			Consumer<Exception> exceptionHandler,
 			JNeonRootNode.Builder builder,
-			ResourcePromise<InputStreamReader, IOException> readerPromise,
+			ResourceSupplier<InputStreamReader, IOException> readerPromise,
 			String fileName)
 	{
 		final Tokeniser tokeniser = new Tokeniser(exceptionHandler,
