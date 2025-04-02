@@ -36,10 +36,10 @@ public class Tokeniser {
 
 	public Tokeniser(
 			Consumer<Exception> exceptionHandler,
-			ResourceSupplier<CharReaderWSourceDocPos, IOException> readerPromise)
+			ResourceSupplier<CharReaderWSourceDocPos, IOException> readerSupplier)
 	{
 		this.exceptionHandler = Objects.requireNonNull(exceptionHandler);
-		this.readerPromise = Objects.requireNonNull(readerPromise);
+		this.readerPromise = Objects.requireNonNull(readerSupplier);
 		new Thread(this::tokenise, "tokenising").start();
 	}
 

@@ -39,7 +39,8 @@ public class JNeonCompiler {
 		try {
 			tokeniseAndBuildAST(
 					exceptionHandler,
-					builder, () -> { return new FileReader(file, charset); },
+					builder,
+					() -> { return new FileReader(file, charset); },
 					file.getCanonicalPath());
 		} catch (IOException e) {
 			exceptionHandler.accept(e);
@@ -49,11 +50,11 @@ public class JNeonCompiler {
 	private void tokeniseAndBuildAST(
 			Consumer<Exception> exceptionHandler,
 			JNeonRootNode.Builder builder,
-			ResourceSupplier<InputStreamReader, IOException> readerPromise,
+			ResourceSupplier<InputStreamReader, IOException> readerSupplier,
 			String fileName)
 	{
 		final Tokeniser tokeniser = new Tokeniser(exceptionHandler,
-				() -> new CharReaderWSourceDocPos(readerPromise.create(), fileName));
+				() -> new CharReaderWSourceDocPos(readerSupplier.create(), fileName));
 		final TokenReader reader = tokeniser.getTokenReader();
 		try {
 			buildAST(builder, reader);
