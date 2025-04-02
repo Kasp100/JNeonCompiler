@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import jneon.JNeonRootNode;
+import jneon.Privacy;
 import jneon.compiler.CompileTimeConsumer;
 import jneon.compiler.Import;
 import jneon.compiler.PkgSign;
@@ -60,7 +61,8 @@ public class ASTBuilder {
 		while(!reader.endOfFileReached()) {
 
 			parseImport(reader, importsConsumer);
-			
+
+			final Optional<Privacy> optPrivacy = parsePrivacy(reader);
 		}
 
 	}
@@ -103,6 +105,25 @@ public class ASTBuilder {
 		}
 
 		return packageNameBuilder.toString();
+	}
+
+	private Optional<Privacy> parsePrivacy(TokenReader reader) throws ReadException {
+
+		if(reader.consumeIfMatches(TokenType.ACCESS_PRIVATE)) {
+
+			return Optional.of(Privacy.PRIVATE);
+
+		}else if(reader.consumeIfMatches(TokenType.ACCESS_PROTECTED)) {
+
+			return Optional.of(Privacy.PROTECTED);
+
+		}else if(reader.consumeIfMatches(TokenType.ACCESS_PUBLIC)) {
+
+			return Optional.of(Privacy.PUBLIC);
+
+		}
+
+		return Optional.empty();
 	}
 
 }
