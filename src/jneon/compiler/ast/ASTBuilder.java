@@ -58,21 +58,32 @@ public class ASTBuilder {
 			throws ReadException, CompileTimeException {
 
 		while(!reader.endOfFileReached()) {
-			if(reader.consumeIfMatches(TokenType.IMPORT)) {
-				importsConsumer.accept(parseImport(reader));
-			}
+
+			parseImport(reader, importsConsumer);
+			
 		}
 
 	}
 
-	private Import parseImport(TokenReader reader) throws ReadException, CompileTimeException {
-		final StringBuilder importBuilder = new StringBuilder();
+	private void parseImport(TokenReader reader, Consumer<Import> importsConsumer) throws ReadException, CompileTimeException {
+		if(!reader.consumeIfMatches(TokenType.IMPORT)) {
+			return;
+		}
+
+		final String packageName = readPackageName(reader);
+
+		importsConsumer.accept(new Import(packageName.toString()));
+	}
+	
+	private String readPackageName(TokenReader reader) throws ReadException, CompileTimeException {
+
+		final StringBuilder packageNameBuilder = new StringBuilder();
 
 		while(!reader.endOfFileReached()) {
 			{
 				final Token token = reader.consume();
 				if(token.getType() == PACKAGE_NAME) {
-					importBuilder.append(token.getContent().get());
+					packageNameBuilder.append(token.getContent().get());
 				}else {
 					throw new CompileTimeException("Package name expected");
 				}
@@ -80,7 +91,7 @@ public class ASTBuilder {
 			{
 				final Token token = reader.consume();
 				if(token.getType() == PACKAGE_SEPARATOR) {
-					importBuilder.append(PACKAGE_SEPARATOR.getSyntax().get());
+					packageNameBuilder.append(PACKAGE_SEPARATOR.getSyntax().get());
 				}else if(token.getType() == IMPORT_SEPARATOR) {
 					break;
 				}else {
@@ -91,7 +102,7 @@ public class ASTBuilder {
 			}
 		}
 
-		return new Import(importBuilder.toString());
+		return packageNameBuilder.toString();
 	}
 
 }
