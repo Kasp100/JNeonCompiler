@@ -40,7 +40,7 @@ public class JNeonCompiler {
 			tokeniseAndBuildAST(
 					exceptionHandler,
 					builder,
-					() -> { return new FileReader(file, charset); },
+					() -> new FileReader(file, charset),
 					file.getCanonicalPath());
 		} catch (IOException e) {
 			exceptionHandler.accept(e);
